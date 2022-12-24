@@ -1,6 +1,6 @@
-# mi_project
+# Heart Rate Monitoring & Drug Infusion Mobile App
 
-A new Flutter project.
+This is an app that controls a prototype of an infusion pump by drug infusion to the patient and it also monitors the patient's heart rate and if an abnormal case occurs it will give Visual and Audial alarms.
 
 ## Getting Started
 
