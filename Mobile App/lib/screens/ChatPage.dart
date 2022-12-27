@@ -22,10 +22,7 @@ class _Message {
 }
 
 class _ChatPage extends State<ChatPage> {
-  static final clientID = 0;
   BluetoothConnection? connection;
-
-  bool isIncubatorOn = false;
   List parametersReceived = [];
 
   // List<_Message> messages = List<_Message>.empty(growable: true);
@@ -51,7 +48,6 @@ class _ChatPage extends State<ChatPage> {
         isConnecting = false;
         isDisconnecting = false;
       });
-
       connection!.input!.listen(_onDataReceived).onDone(() {
         // Example: Detect which side closed the connection
         // There should be `isDisconnecting` flag to show are we are (locally)
@@ -82,7 +78,6 @@ class _ChatPage extends State<ChatPage> {
       connection?.dispose();
       connection = null;
     }
-
     super.dispose();
   }
 
@@ -91,95 +86,71 @@ class _ChatPage extends State<ChatPage> {
     final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.pink,
           title: (isConnecting
               ? Text('Connecting chat to $serverName...')
               : isConnected
                   ? Text('Live chat with $serverName')
                   : Text('Chat log with $serverName'))),
-      body: Visibility(
-        visible: isIncubatorOn,
-        replacement: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Turn the incubator on",
-                style: TextStyle(fontSize: 20),
-              ),
-              IconButton(
-                onPressed: () => setState(() {
-                  !isIncubatorOn
-                      ? {isIncubatorOn = true, _sendMessage("on")}
-                      : null;
-                }),
-                icon: const Icon(Icons.power_settings_new_rounded),
-                iconSize: 150,
-              ),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.pink, width: 5)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          parametersReceived.isNotEmpty
-                              ? "Temperature: ${parametersReceived[0]} °C"
-                              : "No Temperature",
-                          style: const TextStyle(fontSize: 25),
-                        ),
-                        const SizedBox(height: 30),
-                        Text(
-                          parametersReceived.isNotEmpty
-                              ? "Humidity: ${parametersReceived[1]} %"
-                              : "No Humidity",
-                          style: const TextStyle(fontSize: 25),
-                        )
-                      ],
-                    ),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.pink, width: 5)),
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        parametersReceived.isNotEmpty
+                            ? "Temperature: ${parametersReceived[0]} °C"
+                            : "No Temperature",
+                        style: const TextStyle(fontSize: 25),
+                      ),
+                      const SizedBox(height: 30),
+                      Text(
+                        parametersReceived.isNotEmpty
+                            ? "Humidity: ${parametersReceived[1]} %"
+                            : "No Humidity",
+                        style: const TextStyle(fontSize: 25),
+                      )
+                    ],
                   ),
                 ),
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[900]),
-                        onPressed: () => isConnected ? _sendMessage("1") : null,
-                        child: Text("Send 1")),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[900]),
-                        onPressed: () => isConnected ? _sendMessage("2") : null,
-                        child: Text("Send 2")),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[900]),
-                        onPressed: () => isConnected ? _sendMessage("3") : null,
-                        child: Text("Send 3")),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[900]),
-                        onPressed: () => isConnected ? _sendMessage("4") : null,
-                        child: Text("Send 4")),
-                  ],
-                ),
-              )
-            ],
-          ),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[900]),
+                      onPressed: () => isConnected ? _sendMessage("1") : null,
+                      child: Text("Send 1")),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[900]),
+                      onPressed: () => isConnected ? _sendMessage("2") : null,
+                      child: Text("Send 2")),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[900]),
+                      onPressed: () => isConnected ? _sendMessage("3") : null,
+                      child: Text("Send 3")),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[900]),
+                      onPressed: () => isConnected ? _sendMessage("4") : null,
+                      child: Text("Send 4")),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
@@ -188,6 +159,7 @@ class _ChatPage extends State<ChatPage> {
   void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
+    
     for (var byte in data) {
       if (byte == 8 || byte == 127) {
         backspacesCounter++;
@@ -224,7 +196,6 @@ class _ChatPage extends State<ChatPage> {
         // Check incoming message
         if (receivedMessageText.isNotEmpty) {
           parametersReceived = receivedMessageText.split(" ");
-          isIncubatorOn = true;
         }
       });
     } else {
