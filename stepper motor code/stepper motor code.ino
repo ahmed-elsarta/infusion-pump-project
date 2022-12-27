@@ -23,31 +23,39 @@ void loop() {
   transferBluetoothData();
   checkHeartRate();
   controlStepperMotor();
+  // delay(500);
 }
 
-void transferBluetoothData(){
+void transferBluetoothData() {
   // Bluetooth App to Arduino Terminal
   if (bluetooth.available()) Serial.write(bluetooth.read());
   //Arduino Termial to Bluetooth App
-  if (Serial.available()) bluetooth.write(Serial.read());  
+  if (Serial.available()) bluetooth.write(Serial.read());
 }
 
 void controlStepperMotor() {
-  Serial.println("Motor Speed:" + String(motor_speed));
-  Serial.println("Saved Motor Speed:" + String(saved_speed));
+  // Serial.println("Motor Speed:" + String(motor_speed));
+  // Serial.println("Saved Motor Speed:" + String(saved_speed));
+  // Serial.println("");
 
   //reading input, I guess
-  if (Serial.available() != 0) {
-    motor_speed = Serial.parseInt();
-    if (motor_speed != 0) {
-      saved_speed = motor_speed;
-    }
-  } else {
-    motor_speed = saved_speed;
-  }
+  // if (Serial.available() != 0) {
+  //   motor_speed = Serial.parseInt();
+  //   Serial.println(motor_speed);
+  //   if (motor_speed != 0) {
+  //     saved_speed = motor_speed;
+  //   }
+  // } else {
+  //   motor_speed = saved_speed;
+  // }
 
+  // if (motor_speed == 0) {
+  //   motor_speed = saved_speed;
+  // }
   if (motor_speed == 0) {
     motor_speed = saved_speed;
+  } else {
+    saved_speed = motor_speed;
   }
 
   // Moving the motor forward
@@ -57,23 +65,23 @@ void controlStepperMotor() {
 
 void checkHeartRate() {
   // Heart Rate measured by the sensor
-  int heartRate = (analogRead(0) / 8);
-
-  // Print to send to the app
-  Serial.println(heartRate);
+  int heart_rate = analogRead(0) / 8;
 
   // Heart Rate cases
-  if (heartRate < 50) {
-    myStepper.setSpeed(100);
+  if (heart_rate < 50) {
+    motor_speed = 50;
   }
 
-  else if (heartRate > 120) {
-    myStepper.setSpeed(80);
+  else if (heart_rate > 120) {
+    motor_speed = 30;
   }
 
   else {
-    myStepper.setSpeed(40);
+    motor_speed = 5;
   }
 
-  delay(200);
+  // Print to send to the app
+  Serial.print(heart_rate);
+  Serial.print(",");
+  Serial.println(motor_speed);
 }

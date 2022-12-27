@@ -1,7 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mi_project/widgets/heart_rate_container.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class ChatPage extends StatefulWidget {
   static String id = "ChatPageID";
@@ -24,7 +26,8 @@ class _Message {
 class _ChatPage extends State<ChatPage> {
   BluetoothConnection? connection;
 
-  String receivedMessage = "";
+  List<String> measures = [];
+  AudioPlayer alarmPlayer = AudioPlayer();
 
   // List<_Message> messages = List<_Message>.empty(growable: true);
   String receivedMessageText = "";
@@ -92,57 +95,21 @@ class _ChatPage extends State<ChatPage> {
               : isConnected
                   ? Text('Live chat with $serverName')
                   : Text('Chat log with $serverName'))),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade900, width: 5)),
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        receivedMessage,
-                        style: const TextStyle(fontSize: 25),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[900]),
-                      onPressed: () => isConnected ? _sendMessage("1") : null,
-                      child: Text("Send 1")),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[900]),
-                      onPressed: () => isConnected ? _sendMessage("2") : null,
-                      child: Text("Send 2")),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[900]),
-                      onPressed: () => isConnected ? _sendMessage("3") : null,
-                      child: Text("Send 3")),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[900]),
-                      onPressed: () => isConnected ? _sendMessage("4") : null,
-                      child: Text("Send 4")),
-                ],
-              ),
-            )
-          ],
+      body: Container(
+        margin: const EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              HeartRateContainer(
+                  heartRate: measures[0], motorSpeed: measures[1]),
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset("assets/images/pulse.gif",
+                      fit: BoxFit.cover)),
+            ],
+          ),
         ),
       ),
     );
@@ -185,9 +152,11 @@ class _ChatPage extends State<ChatPage> {
             : _messageBuffer + dataString.substring(0, index);
 
         _messageBuffer = dataString.substring(index);
+
         // Check incoming message
         if (receivedMessageText.isNotEmpty) {
-          receivedMessage = receivedMessageText;
+          receivedMessageText = receivedMessageText.trim();
+          measures = receivedMessageText.split(",");
         }
       });
     } else {
@@ -196,25 +165,70 @@ class _ChatPage extends State<ChatPage> {
               0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
     }
-  }
-
-  void _sendMessage(String text) async {
-    text = text.trim();
-    textEditingController.clear();
-
-    if (text.isNotEmpty) {
-      try {
-        connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
-        await connection!.output.allSent;
-
-        // show message sent to arduino
-        // setState(() {
-        //   messages.add(_Message(clientID, text));
-        // });
-      } catch (e) {
-        // Ignore error, but notify state
-        setState(() {});
+    if (double.parse(measures[0]) < 50) {
+      if (!isWarning) {
+        isWarning = true;
+        Alert(
+          context: context,
+          onWillPopActive: true,
+          useRootNavigator: true,
+          title: "Warning",
+          desc: "Hypotensia",
+          style: const AlertStyle(
+            backgroundColor: Colors.white,
+            animationDuration: Duration(milliseconds: 500),
+            isCloseButton: false,
+            isButtonVisible: false,
+            titleStyle: TextStyle(fontSize: 40, color: Colors.red),
+          ),
+        ).show();
+        alarmPlayer.play(AssetSource("audios/alarm.mp3"));
+      }
+    } else if (double.parse(measures[0]) > 120) {
+      if (!isWarning) {
+        isWarning = true;
+        Alert(
+          context: context,
+          onWillPopActive: true,
+          useRootNavigator: true,
+          title: "Warning",
+          desc: "Hypertensia",
+          style: const AlertStyle(
+            backgroundColor: Colors.white,
+            animationDuration: Duration(milliseconds: 500),
+            isCloseButton: false,
+            isButtonVisible: false,
+            titleStyle: TextStyle(fontSize: 40, color: Colors.red),
+          ),
+        ).show();
+        alarmPlayer.play(AssetSource("audios/alarm.mp3"));
+      }
+    } else {
+      if (isWarning) {
+        alarmPlayer.stop();
+        isWarning = false;
+        Navigator.pop(context);
       }
     }
   }
+
+  // void _sendMessage(String text) async {
+  //   text = text.trim();
+  //   textEditingController.clear();
+
+  //   if (text.isNotEmpty) {
+  //     try {
+  //       connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
+  //       await connection!.output.allSent;
+
+  //       // show message sent to arduino
+  //       // setState(() {
+  //       //   messages.add(_Message(clientID, text));
+  //       // });
+  //     } catch (e) {
+  //       // Ignore error, but notify state
+  //       setState(() {});
+  //     }
+  //   }
+  // }
 }

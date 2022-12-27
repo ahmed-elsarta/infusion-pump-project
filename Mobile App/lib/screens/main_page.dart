@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:mi_project/other_files/BackgroundCollectingTask.dart';
-import 'ChatPage.dart';
+import 'chat_page.dart';
 import 'discovery_page.dart';
 import 'select_bonded_device_page.dart';
 
