@@ -23,7 +23,8 @@ class _Message {
 
 class _ChatPage extends State<ChatPage> {
   BluetoothConnection? connection;
-  List parametersReceived = [];
+
+  String receivedMessage = "";
 
   // List<_Message> messages = List<_Message>.empty(growable: true);
   String receivedMessageText = "";
@@ -99,7 +100,7 @@ class _ChatPage extends State<ChatPage> {
                 margin: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.pink, width: 5)),
+                    border: Border.all(color: Colors.blue.shade900, width: 5)),
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -107,16 +108,7 @@ class _ChatPage extends State<ChatPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        parametersReceived.isNotEmpty
-                            ? "Temperature: ${parametersReceived[0]} °C"
-                            : "No Temperature",
-                        style: const TextStyle(fontSize: 25),
-                      ),
-                      const SizedBox(height: 30),
-                      Text(
-                        parametersReceived.isNotEmpty
-                            ? "Humidity: ${parametersReceived[1]} %"
-                            : "No Humidity",
+                        receivedMessage,
                         style: const TextStyle(fontSize: 25),
                       )
                     ],
@@ -159,7 +151,7 @@ class _ChatPage extends State<ChatPage> {
   void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
-    
+
     for (var byte in data) {
       if (byte == 8 || byte == 127) {
         backspacesCounter++;
@@ -195,7 +187,7 @@ class _ChatPage extends State<ChatPage> {
         _messageBuffer = dataString.substring(index);
         // Check incoming message
         if (receivedMessageText.isNotEmpty) {
-          parametersReceived = receivedMessageText.split(" ");
+          receivedMessage = receivedMessageText;
         }
       });
     } else {
