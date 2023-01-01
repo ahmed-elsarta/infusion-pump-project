@@ -1,8 +1,10 @@
 
 # Infusion pump / ICU monitor prototype.
-## video demo
-<video width="320" height="240" controls audio
+
+# video demo
+<video width="640" height="340" controls audio
 src="media/demo_vid.mp4">
+  <source src="media/demo_vid.mp4" type="video/mp4">
 </video>
 
 # Description
