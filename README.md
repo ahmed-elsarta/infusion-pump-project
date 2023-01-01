@@ -2,10 +2,10 @@
 # Infusion pump / ICU monitor prototype.
 
 # video demo
-<video width="640" height="340" controls audio
-src="media/demo_vid.mp4">
-  <source src="media/demo_vid.mp4" type="video/mp4">
-</video>
+
+
+https://user-images.githubusercontent.com/89668727/210170470-487194ef-cf14-48da-ba94-601b862ab763.mp4
+
 
 # Description
 Our project is a demo for an infusion pump that is controlled by the vital signs of the patient (in this case, heart rate)
